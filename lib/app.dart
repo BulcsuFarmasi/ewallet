@@ -1,3 +1,4 @@
+import 'package:ewallet/features/modfiy_transaction/screens/modify_transaction_screen.dart';
 import 'package:ewallet/features/overview/screens/overview_screen.dart';
 import 'package:ewallet/features/start/screens/start_screen.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,8 @@ class _AppState extends State<App> {
         '/': (BuildContext context) => const StartScreen(),
         OverviewScreen.routeName: (BuildContext context) =>
             const OverviewScreen(),
+        ModifyTranactionScreen.routeName: (BuildContext context) =>
+            const ModifyTranactionScreen(),
       },
     );
   }
