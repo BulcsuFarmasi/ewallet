@@ -1,4 +1,5 @@
 import 'package:ewallet/models/transaction.dart';
+import 'package:ewallet/shared/app_validators.dart';
 import 'package:flutter/material.dart';
 
 class ModifyTranactionScreen extends StatefulWidget {
@@ -11,9 +12,19 @@ class ModifyTranactionScreen extends StatefulWidget {
 }
 
 class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
-  TransactionType transactionType = TransactionType.expense;
+  TransactionType _transactionType = TransactionType.expense;
+  DateTime _date = DateTime.now();
+  double _amount = 0;
+  String _description = '';
+  FocusNode _focusNode = FocusNode();
+  final _formKey = GlobalKey<FormState>();
 
-  DateTime date = DateTime.now();
+
+  _submitForm() {
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +44,11 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                     child: RadioListTile<TransactionType>(
                       activeColor: Colors.white,
                       value: TransactionType.expense,
-                      groupValue: transactionType,
+                      groupValue: _transactionType,
                       onChanged: (TransactionType? newTransactionType) {
                         setState(() {
                           if (newTransactionType != null) {
-                            transactionType = newTransactionType;
+                            _transactionType = newTransactionType;
                           }
                         });
                       },
@@ -51,11 +62,11 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                     child: RadioListTile<TransactionType>(
                       value: TransactionType.income,
                       activeColor: Colors.white,
-                      groupValue: transactionType,
+                      groupValue: _transactionType,
                       onChanged: (TransactionType? newTransactionType) {
                         setState(() {
                           if (newTransactionType != null) {
-                            transactionType = newTransactionType;
+                            _transactionType = newTransactionType;
                           }
                         });
                       },
@@ -67,12 +78,45 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: 'Összeg'),
+                keyboardType: TextInputType.number,
+                validator: (String? value) {
+                  String? errorMessage;
+                  if (AppValidators.required(value)) {
+                    errorMessage = 'Kérjük töltsd ki a mezőt';
+                  } else if (AppValidators.isNumber(value)) {
+                    errorMessage = 'Kérjük számot adj meg';
+                  } else if (AppValidators.nonNegative(value)) {
+                    errorMessage = 'Kérjük ne negatív számot adj meg';
+                  }
+                  return errorMessage;
+                },
+                onEditingComplete: () {
+                  _focusNode.nextFocus();
+                },
+                onSaved: (String? value) {
+                  if (value != null) {
+                    _amount = double.tryParse(value)!;
+                  }
+                },
               ),
               const SizedBox(
                 height: 10,
               ),
               TextFormField(
+                focusNode: _focusNode,
+                validator: (String? value) {
+                  String? errorMessage;
+                  if (AppValidators.required(value)) {
+                    errorMessage = 'Kérjük töltsd ki a mezőt';
+                  }
+                  return errorMessage;
+                },
                 decoration: const InputDecoration(hintText: 'Leírás'),
+                onSaved: (String? value) {
+                  if (value != null) {
+                    _description = value;
+                  }
+                },
               ),
               const SizedBox(
                 height: 10,
@@ -80,19 +124,19 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
               Row(
                 children: [
                   Text(
-                    date.toString(),
+                    _date.toString(),
                     style: const TextStyle(color: Colors.white),
                   ),
                   IconButton(
                     onPressed: () async {
                       final selectedDate = await showDatePicker(
                           context: context,
-                          initialDate: date,
-                          firstDate: DateTime(date.year - 5),
-                          lastDate: DateTime(date.year + 5));
+                          initialDate: _date,
+                          firstDate: DateTime(_date.year - 5),
+                          lastDate: DateTime(_date.year + 5));
                       if (selectedDate != null) {
                         setState(() {
-                          date = selectedDate;
+                          _date = selectedDate;
                         });
                       }
                     },
@@ -101,7 +145,8 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                   )
                 ],
               ),
-              ElevatedButton(onPressed: () {}, child: const Text('Hozzáadás')),
+              ElevatedButton(
+                  onPressed: _submitForm, child: const Text('Hozzáadás')),
             ]),
           ),
         ),

@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 class StateContainer extends InheritedWidget {
   final double totalAmount;
   final List<Transaction> transactions;
-  final StateProvider stateProvider;
+  final StateProviderState stateProviderState;
 
-  const StateContainer({required this.totalAmount, required this.transactions, required this.stateProvider, required super.child, super.key, });
+  const StateContainer({required this.totalAmount, required this.transactions, required this.stateProviderState, required super.child, super.key, });
 
-  static StateProvider of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<StateContainer>()!.stateProvider;
+  static StateProviderState of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<StateContainer>()!.stateProviderState;
 
   @override
   bool updateShouldNotify(StateContainer oldWidget) {

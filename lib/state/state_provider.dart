@@ -8,16 +8,26 @@ class StateProvider extends StatefulWidget {
   final Widget child;
 
   @override
-  State<StateProvider> createState() => _StateProviderState();
+  State<StateProvider> createState() => StateProviderState();
 }
 
-class _StateProviderState extends State<StateProvider> {
-
+class StateProviderState extends State<StateProvider> {
   double totalAmount = 0;
   List<Transaction> transactions = [];
 
+  void modifyTotalAmount (double newTotalAmount) {
+    setState(() {
+      totalAmount = newTotalAmount;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StateContainer(child: widget.child, );
+    return StateContainer(
+      totalAmount: totalAmount,
+      transactions: transactions,
+      stateProviderState: this,
+      child: widget.child,
+    );
   }
 }

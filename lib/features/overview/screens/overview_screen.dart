@@ -1,5 +1,6 @@
 import 'package:ewallet/features/modfiy_transaction/screens/modify_transaction_screen.dart';
 import 'package:ewallet/features/overview/widgets/transaction_list.dart';
+import 'package:ewallet/state/state_container.dart';
 import 'package:flutter/material.dart';
 
 class OverviewScreen extends StatelessWidget {
@@ -9,6 +10,7 @@ class OverviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = StateContainer.of(context);
     return Scaffold(
         appBar: AppBar(
           title: const Text('Áttekintés'),
@@ -27,14 +29,14 @@ class OverviewScreen extends StatelessWidget {
             ),
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
+                children:  [
+                  const Text(
                     'Jelenlegi összeg',
                     style: TextStyle(fontSize: 20, color: Colors.white),
                   ),
                   Text(
-                    '15600Ft',
-                    style: TextStyle(
+                    '${state.totalAmount}Ft',
+                    style: const TextStyle(
                         fontSize: 28,
                         color: Colors.white,
                         fontWeight: FontWeight.w600),

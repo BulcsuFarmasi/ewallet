@@ -1,5 +1,6 @@
 import 'package:ewallet/features/overview/screens/overview_screen.dart';
 import 'package:ewallet/shared/app_validators.dart';
+import 'package:ewallet/state/state_container.dart';
 import 'package:flutter/material.dart';
 
 class StartScreen extends StatefulWidget {
@@ -12,8 +13,12 @@ class StartScreen extends StatefulWidget {
 class _StartScreenState extends State<StartScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  double? totalAmount;
+
   void _sumbitForm() {
     if(!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+    StateContainer.of(context).modifyTotalAmount(totalAmount!);
     Navigator.of(context).pushReplacementNamed(OverviewScreen.routeName);
   }
 
@@ -54,6 +59,12 @@ class _StartScreenState extends State<StartScreen> {
                   }
                   return errorMessage;
                 },
+                onSaved: (String? value) {
+                  if (value != null) {
+                    totalAmount = double.tryParse(value);
+                  }
+                },
+
               ),
               const SizedBox(
                 height: 20,
