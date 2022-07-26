@@ -1,15 +1,14 @@
 import 'package:ewallet/features/modfiy_transaction/screens/modify_transaction_screen.dart';
-import 'package:ewallet/models/transaction.dart';
 import 'package:ewallet/state/state_container.dart';
 import 'package:flutter/material.dart';
 
 class TransactionList extends StatelessWidget {
-  TransactionList({Key? key}) : super(key: key);
+  const TransactionList({Key? key}) : super(key: key);
 
-  void deleteTransaction(BuildContext context, String transactionId) {}
+  void deleteTransaction(BuildContext context, int transactionId) {}
 
   void navigateToModifyTransactionScreen(
-      BuildContext context, String transactionId) {
+      BuildContext context, int transactionId) {
     Navigator.of(context)
         .pushNamed(ModifyTranactionScreen.routeName, arguments: transactionId);
   }

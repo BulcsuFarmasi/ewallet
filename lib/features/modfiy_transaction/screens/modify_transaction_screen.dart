@@ -1,5 +1,6 @@
 import 'package:ewallet/models/transaction.dart';
 import 'package:ewallet/shared/app_validators.dart';
+import 'package:ewallet/state/state_container.dart';
 import 'package:flutter/material.dart';
 
 class ModifyTranactionScreen extends StatefulWidget {
@@ -23,7 +24,8 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
   _submitForm() {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
-
+    StateContainer.of(context).addTransaction(description: _description, amount: _amount, type: _transactionType, date: _date);
+    Navigator.of(context).pop();
   }
 
   @override
@@ -37,6 +39,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
         child: Theme(
           data: Theme.of(context).copyWith(unselectedWidgetColor: Colors.white),
           child: Form(
+            key: _formKey,
             child: Column(children: [
               Row(
                 children: [
