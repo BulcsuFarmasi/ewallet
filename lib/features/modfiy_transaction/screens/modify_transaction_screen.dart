@@ -17,14 +17,62 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
   DateTime _date = DateTime.now();
   double _amount = 0;
   String _description = '';
-  FocusNode _focusNode = FocusNode();
+  ModifyMode modifyMode = ModifyMode.add;
+  final FocusNode _focusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
+  bool _isInit = false;
+  int? _id;
+  String _title = 'Pénzmozgás hozzáadása';
+  String _buttonText = 'Hozzáadás';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInit) {
+      _id = ModalRoute
+          .of(context)!
+          .settings
+          .arguments as int?;
+      if (_id != null) {
+        final transaction = StateContainer.of(context).findTransactionById(
+            _id!);
+        _transactionType = transaction.type;
+        _date = transaction.date;
+        _amount = transaction.amount;
+        _description = transaction.description;
+
+        if (_transactionType == TransactionType.expense) {
+          _amount *= -1;
+        }
+
+
+        modifyMode = ModifyMode.edit;
+        _title = 'Pénzmozgás módosítása';
+        _buttonText = 'Módosítás';
+      }
+      _isInit = true;
+    }
+  }
 
 
   _submitForm() {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
-    StateContainer.of(context).addTransaction(description: _description, amount: _amount, type: _transactionType, date: _date);
+    switch (modifyMode) {
+      case ModifyMode.add:
+        StateContainer.of(context).addTransaction(description: _description,
+            amount: _amount,
+            type: _transactionType,
+            date: _date);
+        break;
+      case ModifyMode.edit:
+        StateContainer.of(context).editTransaction(id: _id!,
+            description: _description,
+            amount: _amount,
+            type: _transactionType,
+            date: _date);
+        break;
+    }
     Navigator.of(context).pop();
   }
 
@@ -32,7 +80,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pénzmozgás módosítása'),
+        title: Text(_title),
       ),
       body: Padding(
         padding: const EdgeInsets.all(15),
@@ -93,6 +141,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                   }
                   return errorMessage;
                 },
+                initialValue: '$_amount',
                 onEditingComplete: () {
                   _focusNode.nextFocus();
                 },
@@ -120,6 +169,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                     _description = value;
                   }
                 },
+                initialValue: _description,
               ),
               const SizedBox(
                 height: 10,
@@ -149,7 +199,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                 ],
               ),
               ElevatedButton(
-                  onPressed: _submitForm, child: const Text('Hozzáadás')),
+                  onPressed: _submitForm, child: Text(_buttonText)),
             ]),
           ),
         ),
@@ -157,3 +207,5 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
     );
   }
 }
+
+enum ModifyMode { add, edit }

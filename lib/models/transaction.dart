@@ -1,4 +1,8 @@
+import 'package:hive/hive.dart';
+
+@HiveType(typeId: 0)
 class Transaction {
+  @HiveField(0)
   final int id;
   final String description;
   final DateTime date;

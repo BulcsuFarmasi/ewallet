@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 class TransactionList extends StatelessWidget {
   const TransactionList({Key? key}) : super(key: key);
 
-  void deleteTransaction(BuildContext context, int transactionId) {}
+  void deleteTransaction(BuildContext context, int transactionId) {
+    StateContainer.of(context).deleteTransaction(transactionId);
+  }
 
   void navigateToModifyTransactionScreen(
       BuildContext context, int transactionId) {
