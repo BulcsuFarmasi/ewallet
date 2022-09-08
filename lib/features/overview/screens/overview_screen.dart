@@ -2,6 +2,7 @@ import 'package:ewallet/features/modfiy_transaction/screens/modify_transaction_s
 import 'package:ewallet/features/overview/widgets/transaction_list.dart';
 import 'package:ewallet/state/state_container.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class OverviewScreen extends StatelessWidget {
   const OverviewScreen({super.key});
@@ -27,21 +28,19 @@ class OverviewScreen extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   color: Colors.white),
             ),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children:  [
-                  const Text(
-                    'Jelenlegi összeg',
-                    style: TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                  Text(
-                    '${state.totalAmount}Ft',
-                    style: const TextStyle(
-                        fontSize: 28,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600),
-                  )
-                ]),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              const Text(
+                'Jelenlegi összeg',
+                style: TextStyle(fontSize: 20, color: Colors.white),
+              ),
+              Text(
+                NumberFormat.currency(locale: 'hu', decimalDigits: 2, symbol: 'Ft').format(state.totalAmount),
+                style: const TextStyle(
+                    fontSize: 28,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600),
+              )
+            ]),
             const SizedBox(
               height: 35,
             ),

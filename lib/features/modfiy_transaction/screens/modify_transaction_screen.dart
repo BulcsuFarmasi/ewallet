@@ -2,6 +2,7 @@ import 'package:ewallet/models/transaction.dart';
 import 'package:ewallet/shared/app_validators.dart';
 import 'package:ewallet/state/state_container.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ModifyTranactionScreen extends StatefulWidget {
   const ModifyTranactionScreen({Key? key}) : super(key: key);
@@ -21,7 +22,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
   final FocusNode _focusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
   bool _isInit = false;
-  int? _id;
+  String? _id;
   String _title = 'Pénzmozgás hozzáadása';
   String _buttonText = 'Hozzáadás';
 
@@ -32,7 +33,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
       _id = ModalRoute
           .of(context)!
           .settings
-          .arguments as int?;
+          .arguments as String?;
       if (_id != null) {
         final transaction = StateContainer.of(context).findTransactionById(
             _id!);
@@ -141,7 +142,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                   }
                   return errorMessage;
                 },
-                initialValue: '$_amount',
+                initialValue: NumberFormat.decimalPattern('hu').format(_amount),
                 onEditingComplete: () {
                   _focusNode.nextFocus();
                 },
@@ -177,7 +178,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
               Row(
                 children: [
                   Text(
-                    _date.toString(),
+                    DateFormat.yMMMMd('hu').format(_date),
                     style: const TextStyle(color: Colors.white),
                   ),
                   IconButton(

@@ -1,16 +1,17 @@
 import 'package:ewallet/features/modfiy_transaction/screens/modify_transaction_screen.dart';
 import 'package:ewallet/state/state_container.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TransactionList extends StatelessWidget {
   const TransactionList({Key? key}) : super(key: key);
 
-  void deleteTransaction(BuildContext context, int transactionId) {
+  void deleteTransaction(BuildContext context, String transactionId) {
     StateContainer.of(context).deleteTransaction(transactionId);
   }
 
   void navigateToModifyTransactionScreen(
-      BuildContext context, int transactionId) {
+      BuildContext context, String transactionId) {
     Navigator.of(context)
         .pushNamed(ModifyTranactionScreen.routeName, arguments: transactionId);
   }
@@ -50,14 +51,16 @@ class TransactionList extends StatelessWidget {
               ),
             ),
             subtitle: Text(
-              state.transactions[index].date.toString(),
+              DateFormat.yMMMMd('hu').format(state.transactions[index].date),
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
             ),
             trailing: Text(
-              '${state.transactions[index].amount.toStringAsFixed(0)}Ft',
+              NumberFormat.currency(
+                      locale: 'hu', decimalDigits: 2, symbol: 'Ft')
+                  .format(state.transactions[index].amount),
               style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 18,

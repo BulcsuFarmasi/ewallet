@@ -3,7 +3,7 @@ import 'package:ewallet/state/state_provider.dart';
 import 'package:flutter/material.dart';
 
 class StateContainer extends InheritedWidget {
-  final double totalAmount;
+  final double? totalAmount;
   final List<Transaction> transactions;
   final StateProviderState stateProviderState;
 
