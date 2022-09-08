@@ -1,28 +1,14 @@
 import 'package:ewallet/features/modfiy_transaction/screens/modify_transaction_screen.dart';
-import 'package:ewallet/models/transaction.dart';
+import 'package:ewallet/state/state_container.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TransactionList extends StatelessWidget {
-  TransactionList({Key? key}) : super(key: key);
+  const TransactionList({Key? key}) : super(key: key);
 
-  final transactions = [
-    Transaction(
-      'aaa',
-      'Dunaparty',
-      DateTime(2022, 7, 25),
-      -1220,
-      TransactionType.expense,
-    ),
-    Transaction(
-      'aaab',
-      'Kivétel',
-      DateTime(2022, 7, 21),
-      19000,
-      TransactionType.income,
-    )
-  ];
-
-  void deleteTransaction(BuildContext context, String transactionId) {}
+  void deleteTransaction(BuildContext context, String transactionId) {
+    StateContainer.of(context).deleteTransaction(transactionId);
+  }
 
   void navigateToModifyTransactionScreen(
       BuildContext context, String transactionId) {
@@ -32,11 +18,12 @@ class TransactionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = StateContainer.of(context);
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
         return Dismissible(
           onDismissed: (_) {
-            deleteTransaction(context, transactions[index].id);
+            deleteTransaction(context, state.transactions[index].id);
           },
           background: Container(
             color: Colors.red,
@@ -44,34 +31,36 @@ class TransactionList extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             child: const Icon(Icons.delete, color: Colors.white, size: 40),
           ),
-          key: ValueKey(transactions[index].id),
+          key: ValueKey(state.transactions[index].id),
           child: Card(
               child: ListTile(
             leading: IconButton(
               onPressed: () {
                 navigateToModifyTransactionScreen(
-                    context, transactions[index].id);
+                    context, state.transactions[index].id);
               },
               icon: const Icon(Icons.edit),
               color: Colors.black,
               iconSize: 40,
             ),
             title: Text(
-              transactions[index].description,
+              state.transactions[index].description,
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
               ),
             ),
             subtitle: Text(
-              transactions[index].date.toString(),
+              DateFormat.yMMMMd('hu').format(state.transactions[index].date),
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
             ),
             trailing: Text(
-              '${transactions[index].amount.toStringAsFixed(0)}Ft',
+              NumberFormat.currency(
+                      locale: 'hu', decimalDigits: 2, symbol: 'Ft')
+                  .format(state.transactions[index].amount),
               style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 18,
@@ -80,7 +69,7 @@ class TransactionList extends StatelessWidget {
           )),
         );
       },
-      itemCount: transactions.length,
+      itemCount: state.transactions.length,
     );
   }
 }

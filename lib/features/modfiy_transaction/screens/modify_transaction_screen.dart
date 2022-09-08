@@ -1,5 +1,8 @@
 import 'package:ewallet/models/transaction.dart';
+import 'package:ewallet/shared/app_validators.dart';
+import 'package:ewallet/state/state_container.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ModifyTranactionScreen extends StatefulWidget {
   const ModifyTranactionScreen({Key? key}) : super(key: key);
@@ -11,21 +14,81 @@ class ModifyTranactionScreen extends StatefulWidget {
 }
 
 class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
-  TransactionType transactionType = TransactionType.expense;
+  TransactionType _transactionType = TransactionType.expense;
+  DateTime _date = DateTime.now();
+  double _amount = 0;
+  String _description = '';
+  ModifyMode modifyMode = ModifyMode.add;
+  final FocusNode _focusNode = FocusNode();
+  final _formKey = GlobalKey<FormState>();
+  bool _isInit = false;
+  String? _id;
+  String _title = 'Pénzmozgás hozzáadása';
+  String _buttonText = 'Hozzáadás';
 
-  DateTime date = DateTime.now();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInit) {
+      _id = ModalRoute
+          .of(context)!
+          .settings
+          .arguments as String?;
+      if (_id != null) {
+        final transaction = StateContainer.of(context).findTransactionById(
+            _id!);
+        _transactionType = transaction.type;
+        _date = transaction.date;
+        _amount = transaction.amount;
+        _description = transaction.description;
+
+        if (_transactionType == TransactionType.expense) {
+          _amount *= -1;
+        }
+
+
+        modifyMode = ModifyMode.edit;
+        _title = 'Pénzmozgás módosítása';
+        _buttonText = 'Módosítás';
+      }
+      _isInit = true;
+    }
+  }
+
+
+  _submitForm() {
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+    switch (modifyMode) {
+      case ModifyMode.add:
+        StateContainer.of(context).addTransaction(description: _description,
+            amount: _amount,
+            type: _transactionType,
+            date: _date);
+        break;
+      case ModifyMode.edit:
+        StateContainer.of(context).editTransaction(id: _id!,
+            description: _description,
+            amount: _amount,
+            type: _transactionType,
+            date: _date);
+        break;
+    }
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pénzmozgás módosítása'),
+        title: Text(_title),
       ),
       body: Padding(
         padding: const EdgeInsets.all(15),
         child: Theme(
           data: Theme.of(context).copyWith(unselectedWidgetColor: Colors.white),
           child: Form(
+            key: _formKey,
             child: Column(children: [
               Row(
                 children: [
@@ -33,11 +96,11 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                     child: RadioListTile<TransactionType>(
                       activeColor: Colors.white,
                       value: TransactionType.expense,
-                      groupValue: transactionType,
+                      groupValue: _transactionType,
                       onChanged: (TransactionType? newTransactionType) {
                         setState(() {
                           if (newTransactionType != null) {
-                            transactionType = newTransactionType;
+                            _transactionType = newTransactionType;
                           }
                         });
                       },
@@ -51,11 +114,11 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                     child: RadioListTile<TransactionType>(
                       value: TransactionType.income,
                       activeColor: Colors.white,
-                      groupValue: transactionType,
+                      groupValue: _transactionType,
                       onChanged: (TransactionType? newTransactionType) {
                         setState(() {
                           if (newTransactionType != null) {
-                            transactionType = newTransactionType;
+                            _transactionType = newTransactionType;
                           }
                         });
                       },
@@ -67,12 +130,47 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
               ),
               TextFormField(
                 decoration: const InputDecoration(hintText: 'Összeg'),
+                keyboardType: TextInputType.number,
+                validator: (String? value) {
+                  String? errorMessage;
+                  if (AppValidators.required(value)) {
+                    errorMessage = 'Kérjük töltsd ki a mezőt';
+                  } else if (AppValidators.isNumber(value)) {
+                    errorMessage = 'Kérjük számot adj meg';
+                  } else if (AppValidators.nonNegative(value)) {
+                    errorMessage = 'Kérjük ne negatív számot adj meg';
+                  }
+                  return errorMessage;
+                },
+                initialValue: NumberFormat.decimalPattern('hu').format(_amount),
+                onEditingComplete: () {
+                  _focusNode.nextFocus();
+                },
+                onSaved: (String? value) {
+                  if (value != null) {
+                    _amount = double.tryParse(value)!;
+                  }
+                },
               ),
               const SizedBox(
                 height: 10,
               ),
               TextFormField(
+                focusNode: _focusNode,
+                validator: (String? value) {
+                  String? errorMessage;
+                  if (AppValidators.required(value)) {
+                    errorMessage = 'Kérjük töltsd ki a mezőt';
+                  }
+                  return errorMessage;
+                },
                 decoration: const InputDecoration(hintText: 'Leírás'),
+                onSaved: (String? value) {
+                  if (value != null) {
+                    _description = value;
+                  }
+                },
+                initialValue: _description,
               ),
               const SizedBox(
                 height: 10,
@@ -80,19 +178,19 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
               Row(
                 children: [
                   Text(
-                    date.toString(),
+                    DateFormat.yMMMMd('hu').format(_date),
                     style: const TextStyle(color: Colors.white),
                   ),
                   IconButton(
                     onPressed: () async {
                       final selectedDate = await showDatePicker(
                           context: context,
-                          initialDate: date,
-                          firstDate: DateTime(date.year - 5),
-                          lastDate: DateTime(date.year + 5));
+                          initialDate: _date,
+                          firstDate: DateTime(_date.year - 5),
+                          lastDate: DateTime(_date.year + 5));
                       if (selectedDate != null) {
                         setState(() {
-                          date = selectedDate;
+                          _date = selectedDate;
                         });
                       }
                     },
@@ -101,7 +199,8 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                   )
                 ],
               ),
-              ElevatedButton(onPressed: () {}, child: const Text('Hozzáadás')),
+              ElevatedButton(
+                  onPressed: _submitForm, child: Text(_buttonText)),
             ]),
           ),
         ),
@@ -109,3 +208,5 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
     );
   }
 }
+
+enum ModifyMode { add, edit }
