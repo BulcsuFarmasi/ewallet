@@ -142,7 +142,7 @@ class _ModifyTranactionScreenState extends State<ModifyTranactionScreen> {
                   }
                   return errorMessage;
                 },
-                initialValue: NumberFormat.decimalPattern('hu').format(_amount),
+                initialValue: '$_amount',
                 onEditingComplete: () {
                   _focusNode.nextFocus();
                 },
